@@ -4,13 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MTB ARCHIVE</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
   import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
-
   const firebaseConfig = {
     apiKey: "AIzaSyD0yQWdAWO9P8eccQPRl88qJ71dbviGiwU",
     authDomain: "mtb-database-22746.firebaseapp.com",
@@ -19,207 +18,250 @@
     messagingSenderId: "383100399227",
     appId: "1:383100399227:web:1b9067188613f17ede7cde"
   };
-
   const app = initializeApp(firebaseConfig);
   const db  = getFirestore(app);
-
-  window._db      = db;
-  window._col     = collection;
-  window._addDoc  = addDoc;
-  window._srvTs   = serverTimestamp;
-  window._query   = query;
-  window._orderBy = orderBy;
-  window._onSnap  = onSnapshot;
-  window._delDoc  = deleteDoc;
-  window._doc     = doc;
-  window._fbReady = true;
+  window._db=db; window._col=collection; window._addDoc=addDoc; window._srvTs=serverTimestamp;
+  window._query=query; window._orderBy=orderBy; window._onSnap=onSnapshot;
+  window._delDoc=deleteDoc; window._doc=doc; window._fbReady=true;
   window.dispatchEvent(new Event('firebase-ready'));
 </script>
 
 <style>
-:root {
-  --bg:      #0a0a0a;
-  --bg2:     #111111;
-  --surface: #161616;
-  --surface2:#1e1e1e;
-  --border:  #2a2a2a;
-  --accent:  #e8ff00;
-  --accent2: #ff6b00;
-  --text:    #f0f0f0;
-  --muted:   #666;
-  --muted2:  #444;
-  --mono: 'Space Mono', monospace;
-  --body: 'Syne', sans-serif;
-  --head: 'Orbitron', sans-serif;
-}
 *{margin:0;padding:0;box-sizing:border-box}
+
+:root {
+  --bg: #08090a;
+  --bg2: #0f1012;
+  --surface: #13141a;
+  --surface2: #1a1b22;
+  --surface3: #21222c;
+  --border: rgba(255,255,255,0.06);
+  --border2: rgba(255,255,255,0.12);
+  --accent: #7c6fff;
+  --accent2: #4fffb0;
+  --accent3: #ff6b6b;
+  --text: #f0f0f4;
+  --text2: #9090a0;
+  --text3: #5a5a70;
+  --mono: 'JetBrains Mono', monospace;
+  --body: 'Inter', sans-serif;
+  --r: 10px;
+  --r2: 16px;
+  --glow: 0 0 40px rgba(124,111,255,0.15);
+}
+
 body{font-family:var(--body);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
 
-.grid-bg{position:fixed;inset:0;z-index:0;pointer-events:none;
-  background-image:linear-gradient(rgba(232,255,0,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(232,255,0,.03) 1px,transparent 1px);
-  background-size:40px 40px}
+/* NOISE OVERLAY */
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:radial-gradient(ellipse 80% 60% at 20% 10%,rgba(124,111,255,0.07) 0%,transparent 60%),
+  radial-gradient(ellipse 60% 40% at 80% 90%,rgba(79,255,176,0.05) 0%,transparent 60%)}
 
-/* LOGIN */
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:2px}
+
+/* ===== LOGIN ===== */
 #login-page{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:20px}
 #login-page.hidden{display:none}
-.login-wrap{width:min(440px,100%);position:relative;z-index:1}
-.logo-big{font-family:var(--head);font-size:clamp(3.5rem,12vw,5.5rem);font-weight:900;letter-spacing:-2px;line-height:.9;color:var(--accent);text-shadow:0 0 60px rgba(232,255,0,.3);display:block}
-.logo-sub{font-family:var(--mono);font-size:.6rem;letter-spacing:4px;color:var(--muted);text-transform:uppercase;margin-top:8px;display:block}
-.status-bar{display:flex;align-items:center;gap:8px;margin-top:16px;font-family:var(--mono);font-size:.6rem;color:var(--accent);letter-spacing:2px}
-.status-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:blink 1.5s infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
-.login-header{margin-bottom:40px}
-.login-card{background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--accent);padding:28px;position:relative}
-.login-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent2),transparent)}
-.field-label{font-family:var(--mono);font-size:.55rem;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;display:block}
-.field{width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:.85rem;padding:11px 14px;outline:none;transition:border-color .2s;margin-bottom:16px}
-.field:focus{border-color:var(--accent)}
-.field::placeholder{color:var(--muted2)}
-.field-group{position:relative;margin-bottom:16px}
-.field-group .field{padding-right:44px;margin-bottom:0}
-.eye-btn{position:absolute;right:12px;top:11px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:.8rem}
-.eye-btn:hover{color:var(--accent)}
-.login-btn{width:100%;padding:13px;background:var(--accent);color:var(--bg);border:none;font-family:var(--head);font-size:.7rem;font-weight:700;letter-spacing:3px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
-.login-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);transform:translateX(-100%);transition:transform .4s}
-.login-btn:hover::before{transform:translateX(100%)}
-.login-btn:hover{box-shadow:0 0 30px rgba(232,255,0,.3)}
-.login-btn:disabled{opacity:.5;cursor:not-allowed}
-.login-msg{margin-top:12px;padding:10px 14px;font-family:var(--mono);font-size:.72rem;display:none;align-items:center;gap:8px}
-.login-msg.err{display:flex;background:rgba(255,50,50,.08);border:1px solid rgba(255,50,50,.2);color:#ff6b6b}
-.login-msg.ok {display:flex;background:rgba(232,255,0,.06);border:1px solid rgba(232,255,0,.2);color:var(--accent)}
-.login-msg.load{display:flex;background:rgba(255,107,0,.06);border:1px solid rgba(255,107,0,.2);color:var(--accent2)}
-.spin{width:12px;height:12px;border:2px solid rgba(232,255,0,.3);border-top-color:var(--accent);border-radius:50%;animation:rot .7s linear infinite;flex-shrink:0}
+
+.login-wrap{width:min(420px,100%);position:relative;z-index:1}
+
+.brand{margin-bottom:36px}
+.brand-logo{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.brand-icon{width:44px;height:44px;background:linear-gradient(135deg,var(--accent),#a78bfa);border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:1rem;font-weight:700;color:#fff;letter-spacing:-1px;box-shadow:0 8px 32px rgba(124,111,255,0.35)}
+.brand-name{font-family:var(--mono);font-size:1.5rem;font-weight:700;color:var(--text);letter-spacing:-0.5px}
+.brand-name span{color:var(--accent)}
+.brand-sub{font-family:var(--mono);font-size:0.7rem;color:var(--text3);letter-spacing:2px}
+.status-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(79,255,176,0.07);border:1px solid rgba(79,255,176,0.15);border-radius:100px;padding:4px 12px;margin-top:12px;font-family:var(--mono);font-size:0.62rem;color:var(--accent2);letter-spacing:1px}
+.status-dot{width:5px;height:5px;border-radius:50%;background:var(--accent2);box-shadow:0 0 6px var(--accent2);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.8)}}
+
+.login-card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--r2);padding:28px;box-shadow:var(--glow)}
+
+.field-label{font-family:var(--mono);font-size:0.62rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:8px;display:block}
+.field-wrap{position:relative;margin-bottom:16px}
+.field{width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:0.85rem;padding:11px 14px;border-radius:var(--r);outline:none;transition:all .2s}
+.field:focus{border-color:var(--accent);background:rgba(124,111,255,0.05);box-shadow:0 0 0 3px rgba(124,111,255,0.1)}
+.field::placeholder{color:var(--text3)}
+.field-icon-right{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text3);cursor:pointer;font-size:0.8rem;padding:4px;transition:color .2s}
+.field-icon-right:hover{color:var(--accent)}
+
+.divider{height:1px;background:var(--border);margin:20px 0}
+
+.login-btn{width:100%;padding:12px;background:linear-gradient(135deg,var(--accent),#a78bfa);color:#fff;border:none;border-radius:var(--r);font-family:var(--body);font-size:0.88rem;font-weight:600;letter-spacing:0.3px;cursor:pointer;transition:all .25s;box-shadow:0 4px 20px rgba(124,111,255,0.3)}
+.login-btn:hover{transform:translateY(-1px);box-shadow:0 8px 30px rgba(124,111,255,0.45)}
+.login-btn:active{transform:translateY(0)}
+.login-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+
+.login-msg{margin-top:12px;padding:10px 14px;font-family:var(--mono);font-size:0.72rem;border-radius:var(--r);display:none;align-items:center;gap:8px;line-height:1.4}
+.login-msg.err{display:flex;background:rgba(255,107,107,0.08);border:1px solid rgba(255,107,107,0.2);color:#ff8888}
+.login-msg.ok{display:flex;background:rgba(79,255,176,0.08);border:1px solid rgba(79,255,176,0.2);color:var(--accent2)}
+.login-msg.load{display:flex;background:rgba(124,111,255,0.08);border:1px solid rgba(124,111,255,0.2);color:var(--accent)}
+
+.spin{width:13px;height:13px;border:2px solid rgba(124,111,255,0.2);border-top-color:var(--accent);border-radius:50%;animation:rot .7s linear infinite;flex-shrink:0}
 @keyframes rot{to{transform:rotate(360deg)}}
 
-/* AUTH OVERLAY */
-#auth-overlay{display:none;position:fixed;inset:0;z-index:200;background:var(--bg);align-items:center;justify-content:center;flex-direction:column;gap:32px}
+/* ===== AUTH OVERLAY ===== */
+#auth-overlay{display:none;position:fixed;inset:0;z-index:200;background:var(--bg);align-items:center;justify-content:center;flex-direction:column;gap:28px}
 #auth-overlay.on{display:flex}
-.auth-logo{font-family:var(--head);font-size:clamp(3rem,10vw,5rem);font-weight:900;color:var(--accent);text-shadow:0 0 40px rgba(232,255,0,.4)}
-.auth-label{font-family:var(--mono);font-size:.65rem;letter-spacing:4px;color:var(--muted);text-transform:uppercase}
-.auth-progress{width:200px;height:1px;background:var(--border);overflow:hidden}
-.auth-fill{height:100%;width:0%;background:var(--accent);transition:width .4s ease}
-.auth-dots{display:flex;gap:8px}
-.adot{width:4px;height:4px;border-radius:50%;background:var(--accent);animation:blink 1.4s infinite}
+.ao-logo{font-family:var(--mono);font-size:clamp(2.5rem,8vw,4.5rem);font-weight:700;color:var(--text);letter-spacing:-2px}
+.ao-logo span{color:var(--accent)}
+.ao-label{font-family:var(--mono);font-size:0.65rem;letter-spacing:3px;color:var(--text3);text-transform:uppercase}
+.ao-bar{width:180px;height:2px;background:var(--surface3);border-radius:1px;overflow:hidden}
+.ao-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .4s ease;border-radius:1px}
+.ao-dots{display:flex;gap:6px}
+.adot{width:4px;height:4px;border-radius:50%;background:var(--accent);animation:pulse 1.4s infinite}
 .adot:nth-child(2){animation-delay:.2s}.adot:nth-child(3){animation-delay:.4s}
 
-/* DASHBOARD */
+/* ===== DASHBOARD ===== */
 #dashboard{display:none;min-height:100vh;position:relative;z-index:1}
-.navbar{display:flex;align-items:center;justify-content:space-between;padding:16px 32px;border-bottom:1px solid var(--border);background:rgba(10,10,10,.95);backdrop-filter:blur(20px);position:sticky;top:0;z-index:50;gap:12px;flex-wrap:wrap}
-.nav-logo{font-family:var(--head);font-size:1.3rem;font-weight:900;color:var(--accent);letter-spacing:2px}
-.user-chip{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);padding:6px 14px}
-.chip-name{font-family:var(--mono);font-size:.72rem;color:var(--text)}
-.chip-role{font-family:var(--mono);font-size:.5rem;letter-spacing:2px;padding:2px 7px;text-transform:uppercase;background:rgba(232,255,0,.1);border:1px solid rgba(232,255,0,.2);color:var(--accent)}
-.chip-role.admin{background:rgba(255,107,0,.1);border-color:rgba(255,107,0,.3);color:var(--accent2)}
-.chip-role.dev{background:rgba(255,50,50,.1);border-color:rgba(255,50,50,.2);color:#ff6b6b}
+
+.navbar{display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:60px;border-bottom:1px solid var(--border);background:rgba(8,9,10,0.85);backdrop-filter:blur(24px);position:sticky;top:0;z-index:50;gap:12px}
+.nav-left{display:flex;align-items:center;gap:16px}
+.nav-logo{font-family:var(--mono);font-size:1.05rem;font-weight:700;color:var(--text);letter-spacing:-0.5px}
+.nav-logo span{color:var(--accent)}
+.nav-sep{width:1px;height:20px;background:var(--border)}
+.nav-tag{font-family:var(--mono);font-size:0.6rem;color:var(--text3);letter-spacing:1px}
+
+.user-pill{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:100px;padding:5px 12px 5px 5px}
+.user-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#a78bfa);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:0.62rem;font-weight:700;color:#fff;flex-shrink:0}
+.user-info{display:flex;flex-direction:column}
+.user-name{font-family:var(--mono);font-size:0.72rem;font-weight:500;color:var(--text);line-height:1}
+.user-role{font-family:var(--mono);font-size:0.52rem;color:var(--text3);letter-spacing:1px;margin-top:2px}
+.user-role.admin{color:#ffb347}
+.user-role.dev{color:var(--accent2)}
+.user-role.member{color:var(--accent)}
+
 .nav-right{display:flex;gap:8px;align-items:center}
-.nbtn{display:flex;align-items:center;gap:6px;padding:7px 14px;background:none;border:1px solid var(--border);color:var(--muted);font-family:var(--mono);font-size:.65rem;cursor:pointer;transition:all .2s;text-transform:uppercase;letter-spacing:1px}
-.nbtn:hover{border-color:var(--accent);color:var(--accent)}
-.nbtn.danger:hover{border-color:#ff4444;color:#ff4444}
+.nbtn{display:flex;align-items:center;gap:6px;padding:7px 14px;background:none;border:1px solid var(--border);color:var(--text3);font-family:var(--body);font-size:0.75rem;font-weight:500;cursor:pointer;transition:all .2s;border-radius:var(--r)}
+.nbtn:hover{border-color:var(--border2);color:var(--text);background:var(--surface)}
+.nbtn.danger:hover{border-color:rgba(255,107,107,0.4);color:var(--accent3);background:rgba(255,107,107,0.05)}
 
-.main{padding:28px 32px;max-width:1400px;margin:0 auto}
+.main{padding:28px;max-width:1200px;margin:0 auto}
 
-/* UPLOAD */
-.upload-section{border:1px dashed var(--muted2);padding:24px;margin-bottom:24px;transition:border-color .3s}
-.upload-section:hover{border-color:var(--accent)}
-.upload-section.drag-over{border-color:var(--accent);background:rgba(232,255,0,.02)}
-.section-title{font-family:var(--mono);font-size:.55rem;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:16px;display:flex;align-items:center;gap:8px}
-.upload-area{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.file-input-label{display:flex;align-items:center;gap:10px;flex:1;min-width:200px;background:var(--bg2);border:1px solid var(--border);padding:10px 16px;cursor:pointer;transition:border-color .2s;font-family:var(--mono);font-size:.72rem;color:var(--muted);white-space:nowrap;overflow:hidden}
-.file-input-label:hover{border-color:var(--accent);color:var(--text)}
-.file-input-label i{color:var(--accent);flex-shrink:0}
+/* ===== UPLOAD ZONE ===== */
+.upload-zone{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:24px;margin-bottom:24px;transition:all .3s;position:relative;overflow:hidden}
+.upload-zone::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(124,111,255,0.03),transparent);pointer-events:none}
+.upload-zone:hover{border-color:var(--border2)}
+.upload-zone.drag-over{border-color:rgba(124,111,255,0.5);background:rgba(124,111,255,0.03)}
+.section-header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.section-icon{width:32px;height:32px;background:rgba(124,111,255,0.1);border:1px solid rgba(124,111,255,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.8rem;color:var(--accent);flex-shrink:0}
+.section-title{font-size:0.88rem;font-weight:600;color:var(--text)}
+.section-sub{font-family:var(--mono);font-size:0.65rem;color:var(--text3);margin-top:1px}
+
+.upload-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.file-pick{display:flex;align-items:center;gap:10px;flex:1;min-width:200px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;cursor:pointer;transition:all .2s;font-family:var(--mono);font-size:0.72rem;color:var(--text3)}
+.file-pick:hover{border-color:var(--border2);color:var(--text)}
+.file-pick i{color:var(--accent)}
 #fileInput{display:none}
-.upload-action-btn{padding:10px 22px;background:var(--accent);color:var(--bg);border:none;font-family:var(--head);font-size:.62rem;font-weight:700;letter-spacing:2px;cursor:pointer;white-space:nowrap;transition:all .2s}
-.upload-action-btn:hover{box-shadow:0 0 20px rgba(232,255,0,.25)}
-.upload-action-btn:disabled{opacity:.4;cursor:not-allowed}
-.progress-wrap{margin-top:14px;display:none}
-.progress-info{font-family:var(--mono);font-size:.6rem;color:var(--muted);margin-bottom:6px;display:flex;justify-content:space-between}
-.progress-track{height:2px;background:var(--border);overflow:hidden}
-.progress-fill{height:100%;width:0%;background:var(--accent);transition:width .3s}
+.upload-btn{padding:10px 22px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:var(--body);font-size:0.82rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .2s;box-shadow:0 4px 16px rgba(124,111,255,0.25)}
+.upload-btn:hover{background:#6b5eef;box-shadow:0 6px 24px rgba(124,111,255,0.4);transform:translateY(-1px)}
+.upload-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none}
 
-/* TOOLBAR */
+.progress-wrap{margin-top:16px;display:none}
+.progress-info{font-family:var(--mono);font-size:0.62rem;color:var(--text3);margin-bottom:8px;display:flex;justify-content:space-between}
+.progress-track{height:3px;background:var(--surface3);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s;border-radius:2px}
+
+/* ===== TOOLBAR ===== */
 .toolbar{display:flex;gap:10px;align-items:center;margin-bottom:20px;flex-wrap:wrap}
-.search-wrap{flex:1;min-width:200px;display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);padding:0 14px}
-.search-wrap:focus-within{border-color:var(--accent)}
-.search-wrap i{color:var(--muted);font-size:.75rem}
-.search-wrap input{flex:1;background:none;border:none;outline:none;color:var(--text);font-family:var(--mono);font-size:.75rem;padding:10px 0}
-.search-wrap input::placeholder{color:var(--muted2)}
-.filter-chip{padding:8px 16px;background:none;border:1px solid var(--border);color:var(--muted);font-family:var(--mono);font-size:.65rem;cursor:pointer;transition:all .2s;text-transform:uppercase;letter-spacing:1px;white-space:nowrap}
-.filter-chip:hover,.filter-chip.on{border-color:var(--accent);color:var(--accent);background:rgba(232,255,0,.05)}
+.search-box{flex:1;min-width:200px;display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:0 14px;transition:all .2s}
+.search-box:focus-within{border-color:rgba(124,111,255,0.4);box-shadow:0 0 0 3px rgba(124,111,255,0.08)}
+.search-box i{color:var(--text3);font-size:0.8rem;flex-shrink:0}
+.search-box input{flex:1;background:none;border:none;outline:none;color:var(--text);font-family:var(--mono);font-size:0.75rem;padding:10px 0}
+.search-box input::placeholder{color:var(--text3)}
+.fchip{padding:8px 16px;background:none;border:1px solid var(--border);color:var(--text3);font-family:var(--body);font-size:0.75rem;font-weight:500;cursor:pointer;transition:all .2s;border-radius:var(--r);white-space:nowrap}
+.fchip:hover,.fchip.on{border-color:rgba(124,111,255,0.4);color:var(--accent);background:rgba(124,111,255,0.08)}
 
-/* STATS */
-.stats-bar{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)}
-.stat{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:.65rem;color:var(--muted)}
-.stat b{color:var(--text)}
-.stat i{color:var(--accent)}
+/* ===== STATS ===== */
+.stats-row{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:20px}
+.stat-item{display:flex;align-items:center;gap:7px;font-size:0.78rem;color:var(--text3)}
+.stat-item b{color:var(--text);font-weight:600}
+.stat-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);opacity:0.6}
 
-/* FILE LIST */
+/* ===== FILE LIST ===== */
 .file-list{display:flex;flex-direction:column;gap:2px}
-.file-item{display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:14px;padding:12px 16px;background:var(--surface);border:1px solid transparent;border-left:2px solid transparent;transition:all .2s;animation:slideIn .3s ease both}
-@keyframes slideIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
-.file-item:hover{border-color:var(--border);border-left-color:var(--accent);background:var(--surface2)}
-.file-icon{width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;background:var(--bg2);border:1px solid var(--border)}
-.file-info{overflow:hidden}
-.file-name{font-family:var(--mono);font-size:.78rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px}
-.file-meta{display:flex;gap:10px;align-items:center;font-family:var(--mono);font-size:.58rem;color:var(--muted);flex-wrap:wrap}
-.file-uploader{color:var(--accent);font-weight:700}
-.file-ext{font-family:var(--mono);font-size:.55rem;letter-spacing:2px;padding:3px 8px;border:1px solid var(--muted2);color:var(--muted);text-transform:uppercase;flex-shrink:0}
+
+.file-card{display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:14px;padding:14px 16px;background:var(--surface);border:1px solid transparent;border-radius:var(--r);transition:all .2s;animation:fadeUp .3s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.file-card:hover{border-color:var(--border);background:var(--surface2)}
+
+.file-icon-box{width:38px;height:38px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;background:var(--surface2);border:1px solid var(--border);border-radius:8px}
+.file-info{overflow:hidden;min-width:0}
+.file-name{font-family:var(--mono);font-size:0.78rem;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px}
+.file-meta{display:flex;gap:12px;align-items:center;font-family:var(--mono);font-size:0.6rem;color:var(--text3);flex-wrap:wrap}
+.meta-uploader{color:var(--accent);font-weight:500}
+.meta-badge{background:var(--surface3);border:1px solid var(--border);border-radius:4px;padding:2px 7px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px}
+
 .file-actions{display:flex;gap:6px;flex-shrink:0}
-.faction{width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:none;border:1px solid var(--border);color:var(--muted);font-size:.72rem;cursor:pointer;transition:all .2s}
-.faction:hover{border-color:var(--accent);color:var(--accent)}
-.faction.del:hover{border-color:#ff4444;color:#ff4444;background:rgba(255,68,68,.07)}
+.fact{width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:none;border:1px solid var(--border);color:var(--text3);font-size:0.72rem;cursor:pointer;transition:all .2s;border-radius:7px}
+.fact:hover{border-color:var(--border2);color:var(--accent);background:rgba(124,111,255,0.08)}
+.fact.del:hover{border-color:rgba(255,107,107,0.4);color:var(--accent3);background:rgba(255,107,107,0.06)}
 
-.empty{text-align:center;padding:80px 20px;font-family:var(--mono);color:var(--muted)}
-.empty-icon{font-size:3rem;color:var(--muted2);margin-bottom:16px;display:block}
-.empty p{font-size:.72rem;letter-spacing:1px;margin-top:6px}
+.empty{text-align:center;padding:80px 20px;color:var(--text3)}
+.empty-icon{font-size:2.5rem;color:var(--surface3);margin-bottom:16px;display:block}
+.empty p{font-family:var(--mono);font-size:0.72rem;margin-top:6px;letter-spacing:0.5px}
 
-/* TOAST */
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--surface);border:1px solid var(--border);border-left:2px solid var(--accent);padding:10px 20px;font-family:var(--mono);font-size:.72rem;color:var(--text);z-index:9999;transition:transform .35s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;display:flex;align-items:center;gap:8px;pointer-events:none}
+/* ===== TOAST ===== */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);padding:10px 20px;font-family:var(--mono);font-size:0.72rem;color:var(--text);z-index:9999;transition:transform .35s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;display:flex;align-items:center;gap:10px;pointer-events:none;box-shadow:0 8px 32px rgba(0,0,0,0.4)}
 .toast.on{transform:translateX(-50%) translateY(0)}
+.toast-icon{width:20px;height:20px;border-radius:50%;background:rgba(124,111,255,0.15);display:flex;align-items:center;justify-content:center;font-size:0.65rem;color:var(--accent);flex-shrink:0}
 
-/* MODAL */
-.modal-bg{display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px}
+/* ===== MODAL ===== */
+.modal-bg{display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,0.7);backdrop-filter:blur(12px);align-items:center;justify-content:center;padding:20px}
 .modal-bg.on{display:flex}
-.modal{background:var(--surface);border:1px solid var(--border);border-top:2px solid #ff4444;padding:28px;max-width:380px;width:100%}
-.modal-title{font-family:var(--head);font-size:.75rem;letter-spacing:2px;color:#ff6b6b;margin-bottom:12px}
-.modal-body{font-family:var(--mono);font-size:.75rem;color:var(--muted);line-height:1.7;margin-bottom:24px}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:var(--r2);padding:28px;max-width:380px;width:100%;box-shadow:0 24px 80px rgba(0,0,0,0.5)}
+.modal-icon{width:44px;height:44px;background:rgba(255,107,107,0.1);border:1px solid rgba(255,107,107,0.2);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:var(--accent3);margin-bottom:16px}
+.modal-title{font-size:1rem;font-weight:600;color:var(--text);margin-bottom:8px}
+.modal-body{font-size:0.83rem;color:var(--text2);line-height:1.65;margin-bottom:24px}
 .modal-actions{display:flex;gap:10px}
-.mbtn{flex:1;padding:10px;font-family:var(--mono);font-size:.65rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border:1px solid var(--border);background:none;color:var(--muted);transition:all .2s}
-.mbtn:hover{border-color:var(--muted);color:var(--text)}
-.mbtn.confirm{background:rgba(255,68,68,.1);border-color:rgba(255,68,68,.3);color:#ff6b6b}
-.mbtn.confirm:hover{background:rgba(255,68,68,.2)}
+.mbtn{flex:1;padding:10px 16px;font-family:var(--body);font-size:0.82rem;font-weight:500;cursor:pointer;border:1px solid var(--border);background:none;color:var(--text3);border-radius:var(--r);transition:all .2s}
+.mbtn:hover{border-color:var(--border2);color:var(--text);background:var(--surface2)}
+.mbtn.red{background:rgba(255,107,107,0.08);border-color:rgba(255,107,107,0.25);color:var(--accent3)}
+.mbtn.red:hover{background:rgba(255,107,107,0.15);border-color:rgba(255,107,107,0.5)}
 
 @media(max-width:768px){
-  .navbar{padding:12px 16px}
+  .navbar{padding:0 16px}
   .main{padding:16px}
-  .file-item{grid-template-columns:auto 1fr auto}
-  .file-ext{display:none}
+  .file-card{grid-template-columns:auto 1fr auto}
+  .meta-badge{display:none}
+  .nav-sep,.nav-tag{display:none}
 }
 </style>
 </head>
 <body>
-<div class="grid-bg"></div>
 
 <!-- LOGIN -->
 <section id="login-page">
   <div class="login-wrap">
-    <div class="login-header">
-      <span class="logo-big">MTB</span>
-      <span class="logo-sub">// File Archive System v2.0</span>
-      <div class="status-bar"><div class="status-dot"></div> SYSTEM ONLINE · GITHUB STORAGE</div>
-    </div>
-    <div class="login-card">
-      <div style="margin-bottom:20px">
-        <label class="field-label">// Username</label>
-        <input type="text" id="uInput" class="field" placeholder="enter username...">
-      </div>
-      <div style="margin-bottom:20px">
-        <label class="field-label">// Password</label>
-        <div class="field-group">
-          <input type="password" id="pInput" class="field" placeholder="enter password...">
-          <button class="eye-btn" onclick="togglePw()" id="eyeBtn"><i class="fa-solid fa-eye"></i></button>
+    <div class="brand">
+      <div class="brand-logo">
+        <div class="brand-icon">MTB</div>
+        <div>
+          <div class="brand-name">MTB<span>.</span>Archive</div>
         </div>
       </div>
-      <button class="login-btn" id="loginBtn" onclick="doLogin()">[ AUTHENTICATE ]</button>
+      <div class="brand-sub">// FILE ARCHIVE SYSTEM v2.0</div>
+      <div class="status-pill"><div class="status-dot"></div>SYSTEM ONLINE · GITHUB STORAGE</div>
+    </div>
+    <div class="login-card">
+      <div style="margin-bottom:18px">
+        <label class="field-label">Username</label>
+        <div class="field-wrap">
+          <input type="text" id="uInput" class="field" placeholder="masukkan username...">
+        </div>
+      </div>
+      <div style="margin-bottom:20px">
+        <label class="field-label">Password</label>
+        <div class="field-wrap">
+          <input type="password" id="pInput" class="field" placeholder="masukkan password..." style="padding-right:40px">
+          <button class="field-icon-right" onclick="togglePw()" id="eyeBtn"><i class="fa-solid fa-eye"></i></button>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <button class="login-btn" id="loginBtn" onclick="doLogin()">Masuk ke Arsip</button>
       <div class="login-msg" id="loginMsg"></div>
     </div>
   </div>
@@ -227,19 +269,26 @@ body{font-family:var(--body);background:var(--bg);color:var(--text);min-height:1
 
 <!-- AUTH OVERLAY -->
 <div id="auth-overlay">
-  <div class="auth-logo">MTB</div>
-  <div class="auth-label" id="authLabel">Verifying...</div>
-  <div class="auth-progress"><div class="auth-fill" id="authFill"></div></div>
-  <div class="auth-dots"><div class="adot"></div><div class="adot"></div><div class="adot"></div></div>
+  <div class="ao-logo">MTB<span>.</span></div>
+  <div class="ao-label" id="authLabel">Verifying...</div>
+  <div class="ao-bar"><div class="ao-fill" id="authFill"></div></div>
+  <div class="ao-dots"><div class="adot"></div><div class="adot"></div><div class="adot"></div></div>
 </div>
 
 <!-- DASHBOARD -->
 <div id="dashboard">
   <nav class="navbar">
-    <div class="nav-logo">MTB//ARCHIVE</div>
-    <div class="user-chip">
-      <span class="chip-name" id="navUser">—</span>
-      <span class="chip-role" id="navRole">MEMBER</span>
+    <div class="nav-left">
+      <div class="nav-logo">MTB<span>.</span>Archive</div>
+      <div class="nav-sep"></div>
+      <div class="nav-tag">File Archive System</div>
+    </div>
+    <div class="user-pill">
+      <div class="user-avatar" id="navAvatar">?</div>
+      <div class="user-info">
+        <div class="user-name" id="navUser">—</div>
+        <div class="user-role" id="navRole">member</div>
+      </div>
     </div>
     <div class="nav-right">
       <button class="nbtn danger" onclick="openModal('logoutModal')"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</button>
@@ -247,16 +296,22 @@ body{font-family:var(--body);background:var(--bg);color:var(--text);min-height:1
   </nav>
 
   <div class="main">
-    <!-- UPLOAD (admin/dev only) -->
-    <div class="upload-section" id="uploadSection" style="display:none">
-      <div class="section-title"><i class="fa-brands fa-github"></i> Upload File → GitHub Releases</div>
-      <div class="upload-area">
-        <label class="file-input-label" for="fileInput">
-          <i class="fa-solid fa-folder-open"></i>
-          <span id="fileLabel">Pilih file atau drag & drop disini...</span>
+    <!-- UPLOAD -->
+    <div class="upload-zone" id="uploadSection" style="display:none">
+      <div class="section-header">
+        <div class="section-icon"><i class="fa-brands fa-github"></i></div>
+        <div>
+          <div class="section-title">Upload File</div>
+          <div class="section-sub">Upload ke GitHub Releases · Max 2GB per file</div>
+        </div>
+      </div>
+      <div class="upload-row">
+        <label class="file-pick" for="fileInput">
+          <i class="fa-solid fa-cloud-arrow-up"></i>
+          <span id="fileLabel">Pilih file atau drag & drop di sini...</span>
         </label>
         <input type="file" id="fileInput" multiple onchange="onFileSelect()">
-        <button class="upload-action-btn" id="uploadBtn" onclick="uploadFiles()" disabled>[ UPLOAD ]</button>
+        <button class="upload-btn" id="uploadBtn" onclick="uploadFiles()" disabled>Upload</button>
       </div>
       <div class="progress-wrap" id="progressWrap">
         <div class="progress-info"><span id="progressName">Uploading...</span><span id="progressPct">0%</span></div>
@@ -266,23 +321,23 @@ body{font-family:var(--body);background:var(--bg);color:var(--text);min-height:1
 
     <!-- TOOLBAR -->
     <div class="toolbar">
-      <div class="search-wrap">
+      <div class="search-box">
         <i class="fa-solid fa-magnifying-glass"></i>
-        <input type="text" placeholder="search filename or uploader..." oninput="filterFiles()" id="searchInput">
+        <input type="text" placeholder="Cari nama file atau uploader..." oninput="filterFiles()" id="searchInput">
       </div>
-      <button class="filter-chip" id="myFilesBtn" style="display:none" onclick="toggleMyFiles()"><i class="fa-solid fa-user"></i> My Files</button>
+      <button class="fchip" id="myFilesBtn" style="display:none" onclick="toggleMyFiles()"><i class="fa-solid fa-user"></i> File Saya</button>
     </div>
 
     <!-- STATS -->
-    <div class="stats-bar">
-      <div class="stat"><i class="fa-solid fa-database"></i> Total: <b id="totalCount">0</b> files</div>
-      <div class="stat" id="filteredStat" style="display:none"><i class="fa-solid fa-filter"></i> Showing: <b id="filteredCount">0</b></div>
-      <div class="stat"><i class="fa-brands fa-github"></i> Storage: <b>GitHub Releases</b></div>
+    <div class="stats-row">
+      <div class="stat-item"><div class="stat-dot"></div>Total: <b id="totalCount">0</b> file</div>
+      <div class="stat-item" id="filteredStat" style="display:none"><div class="stat-dot" style="background:var(--accent2)"></div>Ditampilkan: <b id="filteredCount">0</b></div>
+      <div class="stat-item"><div class="stat-dot" style="background:var(--text3)"></div>Storage: <b>GitHub Releases</b></div>
     </div>
 
     <!-- FILE LIST -->
     <div class="file-list" id="fileList">
-      <div class="empty"><span class="empty-icon"><i class="fa-solid fa-box-open"></i></span><p>Loading archive...</p></div>
+      <div class="empty"><span class="empty-icon"><i class="fa-solid fa-box-open"></i></span><p>Memuat arsip...</p></div>
     </div>
   </div>
 </div>
@@ -290,11 +345,12 @@ body{font-family:var(--body);background:var(--bg);color:var(--text);min-height:1
 <!-- LOGOUT MODAL -->
 <div class="modal-bg" id="logoutModal" onclick="if(event.target===this)closeModal('logoutModal')">
   <div class="modal">
-    <div class="modal-title">// CONFIRM LOGOUT</div>
+    <div class="modal-icon"><i class="fa-solid fa-right-from-bracket"></i></div>
+    <div class="modal-title">Konfirmasi Logout</div>
     <div class="modal-body">Apakah kamu yakin ingin keluar dari sesi ini?</div>
     <div class="modal-actions">
       <button class="mbtn" onclick="closeModal('logoutModal')">Batal</button>
-      <button class="mbtn confirm" onclick="location.reload()">Logout</button>
+      <button class="mbtn red" onclick="location.reload()">Logout</button>
     </div>
   </div>
 </div>
@@ -302,41 +358,52 @@ body{font-family:var(--body);background:var(--bg);color:var(--text);min-height:1
 <!-- DELETE MODAL -->
 <div class="modal-bg" id="deleteModal" onclick="if(event.target===this)closeModal('deleteModal')">
   <div class="modal">
-    <div class="modal-title">// CONFIRM DELETE</div>
-    <div class="modal-body">File ini akan dihapus permanen dari GitHub dan database. Tindakan ini tidak bisa dibatalkan.</div>
+    <div class="modal-icon"><i class="fa-solid fa-trash"></i></div>
+    <div class="modal-title">Hapus File?</div>
+    <div class="modal-body">File akan dihapus permanen dari GitHub dan database. Tindakan ini tidak bisa dibatalkan.</div>
     <div class="modal-actions">
       <button class="mbtn" onclick="closeModal('deleteModal')">Batal</button>
-      <button class="mbtn confirm" onclick="doDelete()">Hapus</button>
+      <button class="mbtn red" onclick="doDelete()">Hapus</button>
     </div>
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast"><div class="toast-icon" id="toastIcon"></div><span id="toastMsg"></span></div>
 
 <script>
 // ============================================================
-//  KONFIGURASI — ISI BAGIAN INI
+//  KONFIGURASI
 // ============================================================
-const GITHUB_TOKEN = "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"; // ← paste token GitHub kamu disini
+const GITHUB_TOKEN = "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";
 const GITHUB_OWNER = "tya1002";
 const GITHUB_REPO  = "MTB-Database";
-// ============================================================
+
+// ⬇ EDIT BAGIAN INI UNTUK ATUR ROLE ⬇
+const USER_ROLES = {
+  admin: [],          // ← isi username yang jadi admin, contoh: ["PETOADMIN", "boss"]
+  dev:   ["tya", "rahmat", "MIXO"],  // role dev
+  // username lain otomatis jadi member
+};
+// ⬆ ⬆ ⬆ ⬆ ⬆ ⬆ ⬆ ⬆ ⬆ ⬆ ⬆ ⬆ ⬆ ⬆ ⬆ ⬆
 
 const _KA_NAME  = "Bomax102's Application";
 const _KA_OWNER = "GKwjASBqxy";
 const _KA_VER   = "1.0";
+
 let sessionId = null;
 let activeUser = null;
-
-const USER_ROLES = {
-  admin: ["PETOADMIN"],
-  dev:   ["MIXO", "tya"],
-  member:["P3TO"]
-};
+let retryCount = 0;
+const MAX_RETRY = 3;
 
 function getUserRole(u) {
-  if (USER_ROLES.admin.includes(u)) return "admin";
-  if (USER_ROLES.dev.includes(u))   return "dev";
+  if (!u) return "member";
+  const uLower = u.toLowerCase();
+  for (const admin of USER_ROLES.admin) {
+    if (admin.toLowerCase() === uLower) return "admin";
+  }
+  for (const dev of USER_ROLES.dev) {
+    if (dev.toLowerCase() === uLower) return "dev";
+  }
   return "member";
 }
 
@@ -350,68 +417,143 @@ function generateHWID() {
 function setMsg(msg, type) {
   const el = document.getElementById('loginMsg');
   el.className = 'login-msg ' + type;
-  if (type==='load') el.innerHTML = `<div class="spin"></div> ${msg}`;
-  else if (type==='err') el.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${msg}`;
-  else el.innerHTML = `<i class="fa-solid fa-check"></i> ${msg}`;
+  if (type==='load') el.innerHTML = `<div class="spin"></div>${msg}`;
+  else if (type==='err') el.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i>${msg}`;
+  else el.innerHTML = `<i class="fa-solid fa-circle-check"></i>${msg}`;
 }
 
-async function initSession() {
+// FIX: Session init yang lebih robust dengan retry
+async function initSession(attempt = 0) {
   try {
-    setMsg('Menginisialisasi sesi...', 'load');
-    const p = new URLSearchParams({ type:'init', name:_KA_NAME, ownerid:_KA_OWNER, ver:_KA_VER });
-    const r = await fetch('https://keyauth.win/api/1.2/?' + p);
+    setMsg('Menginisialisasi sesi' + (attempt>0?' (mencoba ulang...)':'') + '...', 'load');
+    const params = new URLSearchParams({
+      type: 'init',
+      name: _KA_NAME,
+      ownerid: _KA_OWNER,
+      ver: _KA_VER
+    });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 12000);
+    const r = await fetch('https://keyauth.win/api/1.2/?' + params.toString(), {
+      method: 'GET',
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
     const d = await r.json();
-    if (d.success) { sessionId = d.sessionid; return true; }
-    setMsg('Gagal memulai sesi.', 'err'); return false;
-  } catch { setMsg('Tidak dapat terhubung ke server.', 'err'); return false; }
+    if (d.success && d.sessionid) {
+      sessionId = d.sessionid;
+      return true;
+    }
+    const reason = d.message || 'Unknown error';
+    setMsg('Gagal init sesi: ' + reason, 'err');
+    return false;
+  } catch (e) {
+    if (attempt < 2) {
+      await new Promise(res => setTimeout(res, 1500));
+      return initSession(attempt + 1);
+    }
+    if (e.name === 'AbortError') {
+      setMsg('Koneksi timeout. Cek internet kamu.', 'err');
+    } else {
+      setMsg('Tidak bisa terhubung ke server auth.', 'err');
+    }
+    return false;
+  }
 }
 
 async function doLogin() {
   const username = document.getElementById('uInput').value.trim();
   const password = document.getElementById('pInput').value.trim();
-  if (!username || !password) { setMsg('Isi username dan password!', 'err'); return; }
+  if (!username || !password) { setMsg('Isi username dan password terlebih dahulu!', 'err'); return; }
   const btn = document.getElementById('loginBtn');
-  btn.disabled = true; btn.textContent = '[ VERIFYING... ]';
-  if (!sessionId) { const ok = await initSession(); if (!ok) { btn.disabled=false; btn.textContent='[ AUTHENTICATE ]'; return; } }
+  btn.disabled = true; btn.textContent = 'Memverifikasi...';
+
+  // Reset session jika tidak ada (fix untuk Vercel)
+  sessionId = null;
+  const ok = await initSession();
+  if (!ok) { btn.disabled=false; btn.textContent='Masuk ke Arsip'; return; }
+
   setMsg('Memeriksa kredensial...', 'load');
   try {
-    const p = new URLSearchParams({ type:'login', username, pass:password, hwid:generateHWID(), sessionid:sessionId, name:_KA_NAME, ownerid:_KA_OWNER });
-    const r = await fetch('https://keyauth.win/api/1.2/?' + p);
+    const params = new URLSearchParams({
+      type: 'login',
+      username: username,
+      pass: password,
+      hwid: generateHWID(),
+      sessionid: sessionId,
+      name: _KA_NAME,
+      ownerid: _KA_OWNER
+    });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 12000);
+    const r = await fetch('https://keyauth.win/api/1.2/?' + params.toString(), {
+      method: 'GET',
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
     const d = await r.json();
+
     if (d.success) {
-      const uname = d.info?.username || username;
+      const uname = (d.info && d.info.username) ? d.info.username : username;
       activeUser = { username: uname, role: getUserRole(uname) };
-      setMsg('Login berhasil!', 'ok');
-      document.getElementById('login-page').classList.add('hidden');
-      showAuthThenDashboard();
+      setMsg('Login berhasil! Memuat dashboard...', 'ok');
+      setTimeout(() => {
+        document.getElementById('login-page').classList.add('hidden');
+        showAuthThenDashboard();
+      }, 600);
     } else {
-      const errMap = { 'User is banned':'Akun diblokir.', 'Incorrect password':'Password salah.', 'User not found':'Username tidak ditemukan.', 'Session does not exist':'Sesi habis, refresh halaman.' };
-      if (d.message?.toLowerCase().includes('session')) sessionId = null;
-      setMsg(errMap[d.message] || 'Login gagal.', 'err');
-      btn.disabled = false; btn.textContent = '[ AUTHENTICATE ]';
+      sessionId = null; // reset agar bisa coba lagi
+      const errMap = {
+        'User is banned': 'Akun kamu diblokir.',
+        'Incorrect password': 'Password salah.',
+        'User not found': 'Username tidak ditemukan.',
+        'Session does not exist': 'Sesi habis, sedang mereset...',
+        'Invalid session': 'Sesi tidak valid, coba lagi.',
+      };
+      const msg = d.message || '';
+      const errMsg = errMap[msg] || ('Login gagal: ' + (msg || 'error tidak diketahui'));
+      setMsg(errMsg, 'err');
+      btn.disabled = false; btn.textContent = 'Masuk ke Arsip';
     }
-  } catch { setMsg('Gagal terhubung.', 'err'); btn.disabled=false; btn.textContent='[ AUTHENTICATE ]'; }
+  } catch(e) {
+    sessionId = null;
+    if (e.name === 'AbortError') {
+      setMsg('Koneksi timeout. Cek internet kamu.', 'err');
+    } else {
+      setMsg('Gagal terhubung ke server.', 'err');
+    }
+    btn.disabled = false; btn.textContent = 'Masuk ke Arsip';
+  }
 }
 
 function showAuthThenDashboard() {
   const ov = document.getElementById('auth-overlay');
   const fill = document.getElementById('authFill');
-  const lbl  = document.getElementById('authLabel');
+  const lbl = document.getElementById('authLabel');
   ov.classList.add('on');
-  const steps = [{p:30,l:'Verifying session...'},{p:60,l:'Loading profile...'},{p:85,l:'Preparing archive...'},{p:100,l:'Welcome!'}];
+  const steps = [
+    {p:25,l:'Verifying credentials...'},
+    {p:55,l:'Loading user profile...'},
+    {p:80,l:'Preparing archive...'},
+    {p:100,l:'Welcome back!'}
+  ];
   let i = 0;
   const iv = setInterval(() => {
     if (i < steps.length) { fill.style.width=steps[i].p+'%'; lbl.textContent=steps[i].l; i++; }
     else { clearInterval(iv); setTimeout(() => { ov.classList.remove('on'); initDashboard(); }, 400); }
-  }, 400);
+  }, 450);
 }
 
 function initDashboard() {
   document.getElementById('dashboard').style.display = 'block';
-  document.getElementById('navUser').textContent = activeUser.username;
+  const u = activeUser.username;
+  document.getElementById('navUser').textContent = u;
+  document.getElementById('navAvatar').textContent = u.substring(0,2).toUpperCase();
   const roleEl = document.getElementById('navRole');
-  roleEl.textContent = activeUser.role.toUpperCase();
-  roleEl.className = 'chip-role ' + activeUser.role;
+  roleEl.textContent = activeUser.role;
+  roleEl.className = 'user-role ' + activeUser.role;
   const canUpload = activeUser.role === 'admin' || activeUser.role === 'dev';
   if (canUpload) {
     document.getElementById('uploadSection').style.display = 'block';
@@ -419,7 +561,7 @@ function initDashboard() {
   }
   if (window._fbReady) startListener();
   else window.addEventListener('firebase-ready', startListener, { once: true });
-  showToast('Login sebagai ' + activeUser.role.toUpperCase(), '✓');
+  showToast('Selamat datang, ' + u + '!', '👋');
 }
 
 // FIRESTORE
@@ -442,12 +584,12 @@ function startListener() {
       renderFiles();
     });
   } catch {
-    document.getElementById('fileList').innerHTML = `<div class="empty"><span class="empty-icon"><i class="fa-solid fa-triangle-exclamation"></i></span><p>Gagal memuat data.</p></div>`;
+    document.getElementById('fileList').innerHTML = `<div class="empty"><span class="empty-icon"><i class="fa-solid fa-triangle-exclamation"></i></span><p>Gagal memuat data Firestore.</p></div>`;
   }
 }
 
 function getFileIcon(ext) {
-  const m = {txt:'📄',rar:'📦',zip:'📦','7z':'📦',rbxm:'🟥',rbxl:'🟥',pdf:'📕',lua:'🌙',json:'📋',xml:'📋',py:'🐍',js:'⚡',html:'🌐',css:'🎨',mp4:'🎬',mp3:'🎵',png:'🖼️',jpg:'🖼️',jpeg:'🖼️'};
+  const m = {txt:'📄',rar:'📦',zip:'📦','7z':'📦',rbxm:'🟥',rbxl:'🟥',pdf:'📕',lua:'🌙',json:'📋',xml:'📋',py:'🐍',js:'⚡',html:'🌐',css:'🎨',mp4:'🎬',mp3:'🎵',png:'🖼️',jpg:'🖼️',jpeg:'🖼️',gif:'🖼️',exe:'⚙️',bat:'⚙️',sh:'💻'};
   return m[(ext||'').toLowerCase()] || '📁';
 }
 
@@ -468,23 +610,25 @@ function renderFiles() {
   const fs = document.getElementById('filteredStat');
   if (data.length !== allFiles.length) { fs.style.display='flex'; document.getElementById('filteredCount').textContent=data.length; }
   else { fs.style.display='none'; }
-  if (!data.length) { list.innerHTML=`<div class="empty"><span class="empty-icon"><i class="fa-solid fa-box-open"></i></span><p>No files found.</p></div>`; return; }
+  if (!data.length) {
+    list.innerHTML=`<div class="empty"><span class="empty-icon"><i class="fa-solid fa-box-open"></i></span><p>Tidak ada file ditemukan.</p></div>`; return;
+  }
   const canDel = activeUser && (activeUser.role==='admin'||activeUser.role==='dev');
   list.innerHTML = data.map((f,i) => `
-    <div class="file-item" style="animation-delay:${i*.03}s">
-      <div class="file-icon">${getFileIcon(f.ext)}</div>
+    <div class="file-card" style="animation-delay:${i*.03}s">
+      <div class="file-icon-box">${getFileIcon(f.ext)}</div>
       <div class="file-info">
         <div class="file-name">${f.name}</div>
         <div class="file-meta">
-          <span class="file-uploader">${f.uploader}</span>
+          <span class="meta-uploader">${f.uploader}</span>
           <span>${f.time}</span>
           <span>${formatSize(f.size)}</span>
+          <span class="meta-badge">.${f.ext||'?'}</span>
         </div>
       </div>
-      <div class="file-ext">.${f.ext}</div>
       <div class="file-actions">
-        <button class="faction" onclick="downloadFile('${encodeURIComponent(f.url)}','${encodeURIComponent(f.name)}')" title="Download"><i class="fa-solid fa-download"></i></button>
-        ${canDel?`<button class="faction del" onclick="confirmDelete('${f.id}','${f.ghAssetId}')" title="Delete"><i class="fa-solid fa-trash"></i></button>`:''}
+        <button class="fact" onclick="downloadFile('${encodeURIComponent(f.url)}','${encodeURIComponent(f.name)}')" title="Download"><i class="fa-solid fa-download"></i></button>
+        ${canDel?`<button class="fact del" onclick="confirmDelete('${f.id}','${f.ghAssetId}')" title="Hapus"><i class="fa-solid fa-trash"></i></button>`:''}
       </div>
     </div>`).join('');
 }
@@ -498,7 +642,7 @@ let selectedFiles = [];
 function onFileSelect() {
   const input = document.getElementById('fileInput');
   selectedFiles = Array.from(input.files);
-  document.getElementById('fileLabel').textContent = selectedFiles.length>1 ? `${selectedFiles.length} files dipilih` : (selectedFiles[0]?.name||'Pilih file...');
+  document.getElementById('fileLabel').textContent = selectedFiles.length>1 ? `${selectedFiles.length} file dipilih` : (selectedFiles[0]?.name||'Pilih file...');
   document.getElementById('uploadBtn').disabled = !selectedFiles.length;
 }
 
@@ -519,7 +663,6 @@ async function getOrCreateRelease() {
 
 async function uploadFiles() {
   if (!selectedFiles.length) return;
-  if (GITHUB_TOKEN === 'GANTI_DENGAN_TOKEN_KAMU') { showToast('Token GitHub belum diisi!', '⚠'); return; }
   const btn = document.getElementById('uploadBtn');
   btn.disabled = true;
   const pw = document.getElementById('progressWrap');
@@ -530,17 +673,15 @@ async function uploadFiles() {
     document.getElementById('progressPct').textContent = '5%';
     const release = await getOrCreateRelease();
     if (!release.upload_url) throw new Error('Gagal mendapatkan release. Cek token & repo.');
-
     for (let i=0; i<selectedFiles.length; i++) {
       const file = selectedFiles[i];
-      const ext  = file.name.split('.').pop() || 'bin';
-      const pct  = Math.round((i/selectedFiles.length)*85)+5;
+      const ext = file.name.split('.').pop() || 'bin';
+      const pct = Math.round((i/selectedFiles.length)*85)+5;
       document.getElementById('progressName').textContent = `Uploading: ${file.name} (${i+1}/${selectedFiles.length})`;
       document.getElementById('progressFill').style.width = pct+'%';
       document.getElementById('progressPct').textContent = pct+'%';
-
       const uploadUrl = release.upload_url.replace('{?name,label}','');
-      const safeName  = file.name.replace(/[^a-zA-Z0-9._\-]/g,'_');
+      const safeName = file.name.replace(/[^a-zA-Z0-9._\-]/g,'_');
       const upRes = await fetch(`${uploadUrl}?name=${encodeURIComponent(safeName)}`, {
         method:'POST',
         headers:{ Authorization:`token ${GITHUB_TOKEN}`, Accept:'application/vnd.github.v3+json', 'Content-Type': file.type||'application/octet-stream' },
@@ -548,18 +689,16 @@ async function uploadFiles() {
       });
       if (!upRes.ok) { const err=await upRes.json(); throw new Error(err.errors?.[0]?.message||'Upload gagal'); }
       const asset = await upRes.json();
-
       await window._addDoc(window._col(window._db,'files'), {
         name: file.name, url: asset.browser_download_url,
         size: file.size, ext, ghAssetId: String(asset.id),
         uploader: activeUser.username, createdAt: window._srvTs()
       });
     }
-
     document.getElementById('progressFill').style.width = '100%';
     document.getElementById('progressPct').textContent = '100%';
     setTimeout(() => { pw.style.display='none'; document.getElementById('progressFill').style.width='0%'; }, 800);
-    document.getElementById('fileLabel').textContent = 'Pilih file atau drag & drop disini...';
+    document.getElementById('fileLabel').textContent = 'Pilih file atau drag & drop di sini...';
     document.getElementById('fileInput').value = '';
     selectedFiles = [];
     showToast('Upload selesai!', '✓');
@@ -583,40 +722,54 @@ async function doDelete() {
       });
     }
     await window._delDoc(window._doc(window._db,'files',_pendingDelete.id));
-    showToast('File dihapus','🗑');
-  } catch { showToast('Gagal menghapus!','✗'); }
+    showToast('File dihapus.', '🗑');
+  } catch { showToast('Gagal menghapus!', '✗'); }
   _pendingDelete = null;
 }
 
 // DOWNLOAD
 async function downloadFile(encodedUrl, encodedName) {
-  const url  = decodeURIComponent(encodedUrl);
+  const url = decodeURIComponent(encodedUrl);
   const name = decodeURIComponent(encodedName);
   try {
-    showToast('Mengunduh...','⬇');
-    const res  = await fetch(url);
+    showToast('Mengunduh...', '⬇');
+    const res = await fetch(url);
     const blob = await res.blob();
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob); a.download = name;
     document.body.appendChild(a); a.click();
     document.body.removeChild(a); URL.revokeObjectURL(a.href);
-    showToast('Download dimulai!','✓');
-  } catch { showToast('Gagal download!','✗'); }
+    showToast('Download dimulai!', '✓');
+  } catch { showToast('Gagal download!', '✗'); }
 }
 
-// UI
+// UI HELPERS
 function togglePw() {
   const p=document.getElementById('pInput'), e=document.getElementById('eyeBtn');
   p.type=p.type==='password'?'text':'password';
   e.innerHTML=p.type==='text'?'<i class="fa-solid fa-eye-slash"></i>':'<i class="fa-solid fa-eye"></i>';
 }
-function showToast(msg,ico='✓') {
+let toastTimer;
+function showToast(msg, ico='✓') {
+  clearTimeout(toastTimer);
   const t=document.getElementById('toast');
-  t.innerHTML=`<span>${ico}</span> ${msg}`; t.classList.add('on');
-  setTimeout(()=>t.classList.remove('on'),2800);
+  document.getElementById('toastIcon').textContent=ico;
+  document.getElementById('toastMsg').textContent=msg;
+  t.classList.add('on');
+  toastTimer=setTimeout(()=>t.classList.remove('on'),3000);
 }
-function openModal(id) { const el=document.getElementById(id); if(!el)return; el.style.display='flex'; requestAnimationFrame(()=>el.classList.add('on')); }
-function closeModal(id) { const el=document.getElementById(id); if(!el)return; el.classList.remove('on'); setTimeout(()=>el.style.display='none',300); }
+function openModal(id) {
+  const el=document.getElementById(id);
+  if(!el)return;
+  el.style.display='flex';
+  requestAnimationFrame(()=>el.classList.add('on'));
+}
+function closeModal(id) {
+  const el=document.getElementById(id);
+  if(!el)return;
+  el.classList.remove('on');
+  setTimeout(()=>el.style.display='none',300);
+}
 
 document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('uInput').addEventListener('keydown',e=>{ if(e.key==='Enter') document.getElementById('pInput').focus(); });
@@ -630,7 +783,7 @@ document.addEventListener('DOMContentLoaded',()=>{
       e.preventDefault(); us.classList.remove('drag-over');
       const files=Array.from(e.dataTransfer.files); if(!files.length)return;
       selectedFiles=files;
-      document.getElementById('fileLabel').textContent=files.length>1?`${files.length} files dipilih`:files[0].name;
+      document.getElementById('fileLabel').textContent=files.length>1?`${files.length} file dipilih`:files[0].name;
       document.getElementById('uploadBtn').disabled=false;
     });
   }
